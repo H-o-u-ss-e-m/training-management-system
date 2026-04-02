@@ -1,0 +1,135 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="page-container">
+      <!-- En-tête -->
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Formateurs</h1>
+          <p>Liste de tous les formateurs internes et externes</p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()" [disabled]="isLoading">
+          <i class="fas fa-plus"></i>
+          Nouveau Formateur
+        </button>
+      </div>
+
+      <!-- État de chargement -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des formateurs...</p>
+      </div>
+
+      <!-- Contenu principal -->
+      <ng-container *ngIf="!isLoading">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher un formateur..."
+            class="search-input"
+          />
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Type</th>
+                <th>Employeur</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let formateur of filteredFormateurs">
+                <td>{{ formateur.nom }}</td>
+                <td>{{ formateur.prenom }}</td>
+                <td>{{ formateur.email }}</td>
+                <td>{{ formateur.tel }}</td>
+                <td>
+                  <span [class]="formateur.type === 'INTERNE' ? 'badge badge-interne' : 'badge badge-externe'">
+                    {{ formateur.type === 'INTERNE' ? 'Interne' : 'Externe' }}
+                  </span>
+                </td>
+                <td>{{ formateur.employeurNom || '-' }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-edit" (click)="openEditModal(formateur)">✏️</button>
+                    <button class="btn-delete" (click)="deleteFormateur(formateur.id!)">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredFormateurs.length === 0">
+                <td colspan="7" class="no-data">Aucun formateur trouvé</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier' : 'Ajouter' }} un formateur</h2>
+      <button class="btn-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" [(ngModel)]="currentFormateur.nom" name="nom" required class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input type="text" [(ngModel)]="currentFormateur.prenom" name="prenom" required class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="currentFormateur.email" name="email" required class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone *</label>
+          <input type="tel" [(ngModel)]="currentFormateur.tel" name="tel" required class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type *</label>
+          <select [(ngModel)]="currentFormateur.type" name="type" required class="form-control">
+            <option value="INTERNE">Interne</option>
+            <option value="EXTERNE">Externe</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Employeur</label>
+          <select [(ngModel)]="currentFormateur.employeurId" name="employeurId" class="form-control">
+            <option [value]="undefined">Aucun</option>
+            <option *ngFor="let employeur of employeurs" [value]="employeur.id">{{ employeur.libelle }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-primary">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

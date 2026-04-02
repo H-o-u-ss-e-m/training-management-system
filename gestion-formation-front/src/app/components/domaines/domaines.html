@@ -1,0 +1,74 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Domaines</h1>
+          <p>Liste de tous les domaines de formation</p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()" [disabled]="isLoading">
+          <i class="fas fa-plus"></i>
+          Nouveau Domaine
+        </button>
+      </div>
+
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des domaines...</p>
+      </div>
+
+      <ng-container *ngIf="!isLoading">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un domaine..." class="search-input" />
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Libellé</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let domaine of filteredDomaines">
+                <td>{{ domaine.id }}</td>
+                <td class="name-cell">{{ domaine.libelle }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-edit" (click)="openEditModal(domaine)"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" (click)="deleteDomaine(domaine.id!)"><i class="fas fa-trash-alt"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredDomaines.length === 0">
+                <td colspan="3" class="no-data"><i class="fas fa-tags"></i><p>Aucun domaine trouvé</p></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier' : 'Ajouter' }} un domaine</h2>
+      <button class="btn-close" (click)="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <form (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-group">
+        <label>Libellé *</label>
+        <input type="text" [(ngModel)]="currentDomaine.libelle" name="libelle" required class="form-control" placeholder="Ex: Informatique" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-primary">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

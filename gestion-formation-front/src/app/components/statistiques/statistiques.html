@@ -1,0 +1,134 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="stats-container">
+      
+      
+      <!-- En-tête -->
+      <div class="page-header">
+        <div>
+          <h1>Tableau de bord analytique</h1>
+          <p>Visualisez les performances de votre centre de formation</p>
+        </div>
+        <div class="header-date">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ today | date:'dd MMMM yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Cartes KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon blue"><i class="fas fa-book-open"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Formations</span>
+            <h2 class="kpi-value">{{ totaux.formations }}</h2>
+            <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> +12%</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon green"><i class="fas fa-users"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Participants</span>
+            <h2 class="kpi-value">{{ totaux.participants }}</h2>
+            <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> +8%</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon purple"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Formateurs</span>
+            <h2 class="kpi-value">{{ totaux.formateurs }}</h2>
+            <span class="kpi-trend neutral"><i class="fas fa-minus"></i> Stable</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon orange"><i class="fas fa-chart-line"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-label">Taux de participation</span>
+            <h2 class="kpi-value">{{ getParticipationRate() }}%</h2>
+            <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> +5%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graphiques -->
+      <div class="charts-grid">
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3>Évolution mensuelle</h3>
+            <div class="chart-legend">
+              <span class="legend-dot formations"></span> Formations
+              <span class="legend-dot participants"></span> Participants
+            </div>
+          </div>
+          <div class="chart-container large">
+            <canvas id="chartEvolution"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Formations par année</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartAnnee"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Répartition par domaine</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartDomaine"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3>Participants par structure</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartStructure"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="insights-section">
+        <h3>Insights & Recommandations</h3>
+        <div class="insights-grid">
+          <div class="insight-card">
+            <i class="fas fa-chart-line"></i>
+            <div class="insight-content">
+              <h4>Performance globale</h4>
+              <p>{{ totaux.formations }} formations organisées cette année.</p>
+            </div>
+          </div>
+          <div class="insight-card">
+            <i class="fas fa-trophy"></i>
+            <div class="insight-content">
+              <h4>Domaine le plus populaire</h4>
+              <p>L'informatique représente le domaine le plus demandé.</p>
+            </div>
+          </div>
+          <div class="insight-card">
+            <i class="fas fa-users"></i>
+            <div class="insight-content">
+              <h4>Participation</h4>
+              <p>{{ totaux.participants }} participants inscrits au total.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

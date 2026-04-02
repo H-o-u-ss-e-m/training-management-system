@@ -1,0 +1,37 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    
+    <!-- Bouton Menu Mobile -->
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+  <i class="fas fa-bars"></i>
+</button>
+
+    <!-- Logo -->
+    <div class="navbar-brand" routerLink="/dashboard">
+      <div class="logo-wrapper">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Excellent</span>
+        <span class="brand-sub">Training</span>
+      </div>
+    </div>
+
+    <!-- User & Logout -->
+    <div class="navbar-actions" *ngIf="isAuthenticated()">
+      <div class="user-info">
+        <div class="user-avatar">
+          <span>{{ getUserInitial() }}</span>
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser?.login }}</span>
+          <span class="user-role">{{ currentUser?.roleNom }}</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Quitter</span>
+      </button>
+    </div>
+  </div>
+</nav>

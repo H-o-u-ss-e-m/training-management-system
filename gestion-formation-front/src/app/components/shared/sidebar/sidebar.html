@@ -1,0 +1,134 @@
+<!-- Version Desktop -->
+<aside class="sidebar desktop-sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <i class="fas fa-graduation-cap"></i>
+      <span>Excellent Training</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard" class="nav-link" routerLinkActive="active-link">
+      <i class="fas fa-th-large"></i>
+      <span>Tableau de bord</span>
+    </a>
+
+    <a routerLink="/formations" class="nav-link" routerLinkActive="active-link">
+      <i class="fas fa-graduation-cap"></i>
+      <span>Formations</span>
+    </a>
+
+    <a routerLink="/participants" class="nav-link" routerLinkActive="active-link">
+      <i class="fas fa-users"></i>
+      <span>Participants</span>
+    </a>
+
+    <a routerLink="/formateurs" class="nav-link" routerLinkActive="active-link">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <span>Formateurs</span>
+    </a>
+
+    <div class="nav-divider"></div>
+
+    <!-- Administration (Admin only) -->
+    <ng-container *ngIf="isAdmin">
+      <div class="nav-section-title">Administration</div>
+      <a routerLink="/domaines" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-tags"></i><span>Domaines</span>
+      </a>
+      <a routerLink="/structures" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-sitemap"></i><span>Structures</span>
+      </a>
+      <a routerLink="/profils" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-id-card"></i><span>Profils</span>
+      </a>
+      <a routerLink="/employeurs" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-building"></i><span>Employeurs</span>
+      </a>
+      <a routerLink="/utilisateurs" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-user-shield"></i><span>Utilisateurs</span>
+      </a>
+    </ng-container>
+
+    <!-- Statistiques -->
+    <ng-container *ngIf="isResponsable || isAdmin">
+      <div class="nav-divider"></div>
+      <a routerLink="/statistiques" class="nav-link" routerLinkActive="active-link">
+        <i class="fas fa-chart-pie"></i><span>Statistiques</span>
+      </a>
+    </ng-container>
+  </nav>
+</aside>
+
+<!-- Version Mobile (Overlay) -->
+<div class="mobile-menu-overlay" [class.show]="mobileOpen" (click)="closeMobile()"></div>
+<div class="mobile-sidebar" [class.show]="mobileOpen">
+  <div class="mobile-header">
+    <div class="mobile-logo">
+      <i class="fas fa-graduation-cap"></i>
+      <span>Excellent Training</span>
+    </div>
+    <button class="mobile-close" (click)="closeMobile()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="mobile-user" *ngIf="currentUser">
+    <div class="mobile-avatar">
+      <span>{{ getUserInitial() }}</span>
+    </div>
+    <div class="mobile-user-info">
+      <div class="mobile-user-name">{{ currentUser.login }}</div>
+      <div class="mobile-user-role">{{ currentUser.roleNom }}</div>
+    </div>
+  </div>
+
+  <nav class="mobile-nav">
+    <a routerLink="/dashboard" (click)="closeMobile()" routerLinkActive="active-mobile">
+      <i class="fas fa-th-large"></i><span>Tableau de bord</span>
+    </a>
+    <a routerLink="/formations" (click)="closeMobile()" routerLinkActive="active-mobile">
+      <i class="fas fa-graduation-cap"></i><span>Formations</span>
+    </a>
+    <a routerLink="/participants" (click)="closeMobile()" routerLinkActive="active-mobile">
+      <i class="fas fa-users"></i><span>Participants</span>
+    </a>
+    <a routerLink="/formateurs" (click)="closeMobile()" routerLinkActive="active-mobile">
+      <i class="fas fa-chalkboard-teacher"></i><span>Formateurs</span>
+    </a>
+
+    <div class="mobile-divider"></div>
+
+    <ng-container *ngIf="isAdmin">
+      <div class="mobile-section-title">Administration</div>
+      <a routerLink="/domaines" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-tags"></i><span>Domaines</span>
+      </a>
+      <a routerLink="/structures" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-sitemap"></i><span>Structures</span>
+      </a>
+      <a routerLink="/profils" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-id-card"></i><span>Profils</span>
+      </a>
+      <a routerLink="/employeurs" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-building"></i><span>Employeurs</span>
+      </a>
+      <a routerLink="/utilisateurs" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-user-shield"></i><span>Utilisateurs</span>
+      </a>
+      <div class="mobile-divider"></div>
+    </ng-container>
+
+    <ng-container *ngIf="isResponsable || isAdmin">
+      <a routerLink="/statistiques" (click)="closeMobile()" routerLinkActive="active-mobile">
+        <i class="fas fa-chart-pie"></i><span>Statistiques</span>
+      </a>
+    </ng-container>
+  </nav>
+
+  <div class="mobile-footer">
+    <button class="mobile-logout" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i> Déconnexion
+    </button>
+  </div>
+</div>

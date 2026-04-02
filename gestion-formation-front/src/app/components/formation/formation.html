@@ -1,0 +1,186 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="page-container">
+      <!-- En-tête -->
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Formations</h1>
+          <p>Liste de toutes les formations</p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()" [disabled]="isLoading">
+          <i class="fas fa-plus"></i>
+          Nouvelle Formation
+        </button>
+      </div>
+
+      <!-- État de chargement -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des formations...</p>
+      </div>
+
+      <!-- Contenu principal -->
+      <ng-container *ngIf="!isLoading">
+        <!-- Recherche -->
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher une formation par titre, domaine ou lieu..."
+            class="search-input"
+          />
+        </div>
+
+        <!-- Tableau des formations -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Année</th>
+                <th>Durée</th>
+                <th>Domaine</th>
+                <th>Budget</th>
+                <th>Lieu</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let formation of filteredFormations">
+                <td class="title-cell">
+                  <strong>{{ formation.titre }}</strong>
+                </td>
+                <td>{{ formation.annee }}</td>
+                <td>{{ formation.duree }} jour(s)</td>
+                <td>
+                  <span class="badge badge-domain">{{ formation.domaineLibelle }}</span>
+                </td>
+                <td class="budget-cell">{{ formation.budget | number }} DT</td>
+                <td>{{ formation.lieu }}</td>
+                <td>{{ formation.dateFormation | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-edit" (click)="openEditModal(formation)" title="Modifier">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" (click)="deleteFormation(formation.id!)" title="Supprimer">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredFormations.length === 0">
+                <td colspan="8" class="no-data">
+                  <i class="fas fa-inbox"></i>
+                  <p>Aucune formation trouvée</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Ajout/Modification -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une formation</h2>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Titre *</label>
+          <input type="text" [(ngModel)]="currentFormation.titre" name="titre" required class="form-control" placeholder="Ex: Angular Avancé" />
+        </div>
+
+        <div class="form-group">
+          <label>Année *</label>
+          <input type="number" [(ngModel)]="currentFormation.annee" name="annee" required class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Durée (jours) *</label>
+          <input type="number" [(ngModel)]="currentFormation.duree" name="duree" required class="form-control" min="1" />
+        </div>
+
+        <div class="form-group">
+          <label>Budget (DT) *</label>
+          <input type="number" [(ngModel)]="currentFormation.budget" name="budget" required class="form-control" min="0" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Domaine *</label>
+          <select [(ngModel)]="currentFormation.domaineId" name="domaineId" required class="form-control">
+            <option [value]="0">Sélectionner un domaine</option>
+            <option *ngFor="let domaine of domaines" [value]="domaine.id">{{ domaine.libelle }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Formateur</label>
+          <select [(ngModel)]="currentFormation.formateurId" name="formateurId" class="form-control">
+            <option [value]="undefined">Sélectionner un formateur</option>
+            <option *ngFor="let formateur of formateurs" [value]="formateur.id">
+              {{ formateur.nom }} {{ formateur.prenom }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Lieu *</label>
+          <input type="text" [(ngModel)]="currentFormation.lieu" name="lieu" required class="form-control" placeholder="Ex: Salle A, en ligne..." />
+        </div>
+
+        <div class="form-group">
+          <label>Date de formation *</label>
+          <input type="date" [(ngModel)]="currentFormation.dateFormation" name="dateFormation" required class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Participants</label>
+        <div class="participants-list">
+          <div *ngFor="let participant of participants" class="participant-item">
+            <input
+              type="checkbox"
+              [checked]="isParticipantSelected(participant.id!)"
+              (change)="toggleParticipant(participant.id!)"
+              [id]="'participant-' + participant.id"
+            />
+            <label [for]="'participant-' + participant.id">
+              <strong>{{ participant.nom }} {{ participant.prenom }}</strong>
+              <span class="participant-info">{{ participant.structureLibelle }} - {{ participant.profilLibelle }}</span>
+            </label>
+          </div>
+          <div *ngIf="participants.length === 0" class="no-participants">
+            Aucun participant disponible
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-primary">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

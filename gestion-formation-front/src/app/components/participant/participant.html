@@ -1,0 +1,149 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="page-container">
+      <!-- En-tête -->
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Participants</h1>
+          <p>Liste de tous les participants aux formations</p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()" [disabled]="isLoading">
+          <i class="fas fa-plus"></i>
+          Nouveau Participant
+        </button>
+      </div>
+
+      <!-- État de chargement -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des participants...</p>
+      </div>
+
+      <!-- Contenu principal -->
+      <ng-container *ngIf="!isLoading">
+        <!-- Recherche -->
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher un participant par nom, prénom, email ou structure..."
+            class="search-input"
+          />
+        </div>
+
+        <!-- Tableau des participants -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Structure</th>
+                <th>Profil</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let participant of filteredParticipants">
+                <td class="name-cell">{{ participant.nom }}</td>
+                <td>{{ participant.prenom }}</td>
+                <td>{{ participant.email }}</td>
+                <td>{{ participant.tel }}</td>
+                <td>
+                  <span class="badge badge-structure">{{ participant.structureLibelle }}</span>
+                </td>
+                <td>
+                  <span class="badge badge-profil">{{ participant.profilLibelle }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-edit" (click)="openEditModal(participant)" title="Modifier">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" (click)="deleteParticipant(participant.id!)" title="Supprimer">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredParticipants.length === 0">
+                <td colspan="7" class="no-data">
+                  <i class="fas fa-users-slash"></i>
+                  <p>Aucun participant trouvé</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Ajout/Modification -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier' : 'Ajouter' }} un participant</h2>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" [(ngModel)]="currentParticipant.nom" name="nom" required class="form-control" placeholder="Ex: Dupont" />
+        </div>
+
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input type="text" [(ngModel)]="currentParticipant.prenom" name="prenom" required class="form-control" placeholder="Ex: Jean" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="currentParticipant.email" name="email" required class="form-control" placeholder="exemple@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone *</label>
+          <input type="tel" [(ngModel)]="currentParticipant.tel" name="tel" required class="form-control" placeholder="Ex: 12345678" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Structure *</label>
+          <select [(ngModel)]="currentParticipant.structureId" name="structureId" required class="form-control">
+            <option [value]="0">Sélectionner une structure</option>
+            <option *ngFor="let structure of structures" [value]="structure.id">{{ structure.libelle }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Profil *</label>
+          <select [(ngModel)]="currentParticipant.profilId" name="profilId" required class="form-control">
+            <option [value]="0">Sélectionner un profil</option>
+            <option *ngFor="let profil of profils" [value]="profil.id">{{ profil.libelle }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-primary">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

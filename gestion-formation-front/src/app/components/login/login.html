@@ -1,0 +1,66 @@
+<div class="login-wrapper">
+  <!-- Image de fond avec overlay intégré via CSS -->
+  <div class="login-background"></div>
+  
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-side-image">
+        <!-- Optionnel: Une petite illustration ou logo sur le côté -->
+        <div class="overlay-text">
+          <h2>Excellent Training</h2>
+          <p>Propulsez votre carrière avec nos formations certifiées.</p>
+        </div>
+      </div>
+
+      <div class="login-form-section">
+        <div class="login-header">
+          <h1>Connexion</h1>
+          <p>Accédez à votre espace de gestion</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="login-form">
+          <div class="form-group">
+            <label>Identifiant</label>
+            <div class="input-icon-wrapper">
+              <i class="fas fa-envelope"></i>
+              <input
+                type="text"
+                [(ngModel)]="login"
+                name="login"
+                placeholder="Ex: admin_isi"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <div class="input-icon-wrapper">
+              <i class="fas fa-lock"></i>
+              <input
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="error-msg" *ngIf="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+          </div>
+
+          <button type="submit" class="btn-login" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Se connecter</span>
+            <span *ngIf="isLoading" class="spinner"></span>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <p>© 2024 ISI Formation - Système de Gestion v1.0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

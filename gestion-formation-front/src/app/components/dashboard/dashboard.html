@@ -1,0 +1,106 @@
+<app-navbar></app-navbar>
+
+<div class="main-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="dashboard-wrapper">
+      
+      <!-- En-tête de page -->
+      <div class="page-header">
+        <div class="header-left">
+          <h1>Tableau de bord</h1>
+          <p>Bienvenue dans votre espace de gestion de formation</p>
+        </div>
+        <div class="header-date">
+          <i class="far fa-calendar-alt"></i>
+          <span>{{ today | date:'dd MMMM yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- État de chargement -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des données...</p>
+        <button (click)="loadTotaux()" class="retry-btn">Réessayer</button>
+      </div>
+
+      <!-- Statistiques Grid - Affiche toujours quand pas en chargement -->
+      <div class="stats-container" *ngIf="!isLoading">
+        <div class="stat-card" (click)="navigateTo('/formations')">
+          <div class="stat-icon-box blue">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Formations</span>
+            <h3 class="stat-value">{{ totaux.formations }}</h3>
+          </div>
+          <div class="stat-trend positive">
+            <i class="fas fa-arrow-up"></i> 12%
+          </div>
+        </div>
+
+        <div class="stat-card" (click)="navigateTo('/participants')">
+          <div class="stat-icon-box green">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Participants</span>
+            <h3 class="stat-value">{{ totaux.participants }}</h3>
+          </div>
+          <div class="stat-trend">
+            <i class="fas fa-users"></i>
+          </div>
+        </div>
+
+        <div class="stat-card" (click)="navigateTo('/formateurs')">
+          <div class="stat-icon-box purple">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Formateurs</span>
+            <h3 class="stat-value">{{ totaux.formateurs }}</h3>
+          </div>
+          <div class="stat-trend">
+            <i class="fas fa-briefcase"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Rapides & Infos -->
+      <div class="dashboard-footer-grid" *ngIf="!isLoading">
+        
+        <div class="quick-actions-panel">
+          <div class="panel-header">
+            <h3>Actions rapides</h3>
+          </div>
+          <div class="actions-buttons">
+            <button class="action-item" (click)="navigateTo('/formations')">
+              <div class="action-icon bg-blue"><i class="fas fa-plus"></i></div>
+              <span>Nouvelle Formation</span>
+            </button>
+            <button class="action-item" (click)="navigateTo('/participants')">
+              <div class="action-icon bg-green"><i class="fas fa-user-plus"></i></div>
+              <span>Inscrire Participant</span>
+            </button>
+            <button class="action-item" (click)="navigateTo('/statistiques')">
+              <div class="action-icon bg-purple"><i class="fas fa-chart-line"></i></div>
+              <span>Analyses Détaillées</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="panel-header">
+            <h3>Notes de session</h3>
+          </div>
+          <div class="panel-content">
+            <p>Le système est à jour. Vous avez <strong>{{ totaux.formations }}</strong> formations actives pour l'année en cours.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
