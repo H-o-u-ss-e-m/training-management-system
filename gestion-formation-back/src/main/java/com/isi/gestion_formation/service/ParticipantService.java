@@ -8,6 +8,8 @@ import com.isi.gestion_formation.repository.iRepository.IStructureRepository;
 import com.isi.gestion_formation.service.iService.IParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,52 +22,136 @@ public class ParticipantService implements IParticipantService {
     private final IProfilRepository profilRepo;
 
     @Override
+    @Transactional
     public ParticipantDTO save(ParticipantDTO dto) {
-        Participant p = (dto.getId() != null) ?
-                repo.findById(dto.getId()).orElse(new Participant()) : new Participant();
+        try {
+            if (dto == null) {
+                throw new IllegalArgumentException("Les données du participant sont obligatoires");
+            }
 
-        p.setNom(dto.getNom());
-        p.setPrenom(dto.getPrenom());
-        p.setEmail(dto.getEmail());
-        p.setTel(dto.getTel());
+            // Validation des champs obligatoires
+            if (dto.getNom() == null || dto.getNom().trim().isEmpty()) {
+                throw new IllegalArgumentException("Le nom du participant est obligatoire");
+            }
+            if (dto.getPrenom() == null || dto.getPrenom().trim().isEmpty()) {
+                throw new IllegalArgumentException("Le prénom du participant est obligatoire");
+            }
+            if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("L'email du participant est obligatoire");
+            }
 
-        if (dto.getStructureId() != null)
-            p.setStructure(structureRepo.findById(dto.getStructureId()).orElse(null));
-        if (dto.getProfilId() != null)
-            p.setProfil(profilRepo.findById(dto.getProfilId()).orElse(null));
+            Participant participant = (dto.getId() != null)
+                    ? repo.findById(dto.getId()).orElse(new Participant())
+                    : new Participant();
 
-        Participant saved = repo.save(p);
-        return toDTO(saved);
+            participant.setNom(dto.getNom().trim());
+            participant.setPrenom(dto.getPrenom().trim());
+            participant.setEmail(dto.getEmail().trim());
+
+            // Correction ici : Tel est un Long → pas de trim()
+            participant.setTel(dto.getTel());   // On garde tel tel quel (pas de trim)
+
+            // Association Structure (optionnelle)
+            if (dto.getStructureId() != null) {
+                participant.setStructure(structureRepo.findById(dto.getStructureId())
+                        .orElseThrow(() -> new IllegalArgumentException("Structure non trouvée avec l'ID : " + dto.getStructureId())));
+            } else {
+                participant.setStructure(null);
+            }
+
+            // Association Profil (optionnelle)
+            if (dto.getProfilId() != null) {
+                participant.setProfil(profilRepo.findById(dto.getProfilId())
+                        .orElseThrow(() -> new IllegalArgumentException("Profil non trouvé avec l'ID : " + dto.getProfilId())));
+            } else {
+                participant.setProfil(null);
+            }
+
+            Participant saved = repo.save(participant);
+            return toDTO(saved);
+
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement du participant : " + e.getMessage(), e);
+        }
     }
 
     @Override
+    @Transactional
     public ParticipantDTO update(Long id, ParticipantDTO dto) {
-        dto.setId(id);
-        return save(dto);
+        try {
+            if (id == null) {
+                throw new IllegalArgumentException("L'ID est obligatoire pour la mise à jour");
+            }
+            dto.setId(id);
+            return save(dto);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la mise à jour du participant : " + e.getMessage(), e);
+        }
     }
 
     @Override
     public List<ParticipantDTO> findAll() {
-        return repo.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        try {
+            return repo.findAll().stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de la liste des participants : " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ParticipantDTO findById(Long id) {
-        return repo.findById(id).map(this::toDTO).orElse(null);
+        try {
+            if (id == null) {
+                throw new IllegalArgumentException("L'ID est obligatoire");
+            }
+
+            return repo.findById(id)
+                    .map(this::toDTO)
+                    .orElse(null);
+
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la recherche du participant : " + e.getMessage(), e);
+        }
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        repo.deleteById(id);
+        try {
+            if (id == null) {
+                throw new IllegalArgumentException("L'ID est obligatoire pour la suppression");
+            }
+
+            if (!repo.existsById(id)) {
+                throw new IllegalArgumentException("Participant avec l'ID " + id + " non trouvé");
+            }
+
+            repo.deleteById(id);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la suppression du participant : " + e.getMessage(), e);
+        }
     }
 
     private ParticipantDTO toDTO(Participant p) {
+        if (p == null) return null;
+
         ParticipantDTO dto = new ParticipantDTO();
         dto.setId(p.getId());
         dto.setNom(p.getNom());
         dto.setPrenom(p.getPrenom());
         dto.setEmail(p.getEmail());
-        dto.setTel(p.getTel());
+        dto.setTel(p.getTel());                    // Tel reste en Long
+
         if (p.getStructure() != null) {
             dto.setStructureId(p.getStructure().getId());
             dto.setStructureLibelle(p.getStructure().getLibelle());

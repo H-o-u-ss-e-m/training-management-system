@@ -7,6 +7,10 @@ public interface IStatistiqueService {
     List<StatDTO> formationsParAnnee();
     List<StatDTO> formationsParDomaine();
     List<StatDTO> formationsParStructure();
+
+    // ✅ AJOUTER CETTE LIGNE
+    List<StatDTO> formationsParMois();
+
     Long totalFormations();
     Long totalParticipants();
     Long totalFormateurs();

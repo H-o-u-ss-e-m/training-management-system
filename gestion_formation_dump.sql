@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict Dcg2F5gb9XL9CD2DOC1dK2CbV7UQeNofL63sML01WdsYJmpuaEqiEM7aahanWiB
+\restrict nhY1Z0QpeEG4g04sw7kB1d0tfYIuaeXHcrPUAmvHwwm36R6wiN2r0S90kt4vLva
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
@@ -426,10 +426,10 @@ COPY public.structure (id, libelle) FROM stdin;
 --
 
 COPY public.utilisateur (id, login, password, id_role) FROM stdin;
-1	admin	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	3
-4	chef_formation	$2a$10$QYXwyiNtVnL8AdHml4PxE.XkHpQhWe0f5lc30e2vtGqVomYaSCpM6	2
 5	admin1	$2a$10$xJhh4dR4JnidhXvJqdVE2Ow8zmtdLQgbGfV3hzWQp0/yFhXwpyJEK	3
-2	responsable	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	1
+2	responsable	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	2
+4	chef_formation	$2a$10$QYXwyiNtVnL8AdHml4PxE.XkHpQhWe0f5lc30e2vtGqVomYaSCpM6	2
+1	test	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	1
 \.
 
 
@@ -644,5 +644,5 @@ ALTER TABLE ONLY public.participer
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Dcg2F5gb9XL9CD2DOC1dK2CbV7UQeNofL63sML01WdsYJmpuaEqiEM7aahanWiB
+\unrestrict nhY1Z0QpeEG4g04sw7kB1d0tfYIuaeXHcrPUAmvHwwm36R6wiN2r0S90kt4vLva
 

@@ -1,11 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { StatistiqueService } from '../../services/statistique.service';
 import { NavbarComponent } from '../shared/navbar/navbar';
+import { SidebarComponent } from '../shared/sidebar/sidebar';
 import { StatDTO, Totaux } from '../../models/statistique.model';
 import Chart from 'chart.js/auto';
-import { SidebarComponent } from '../shared/sidebar/sidebar';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-statistiques',
@@ -14,136 +15,240 @@ import { SidebarComponent } from '../shared/sidebar/sidebar';
   templateUrl: './statistiques.html',
   styleUrls: ['./statistiques.css']
 })
-export class StatistiquesComponent implements OnInit, OnDestroy {
-  
+export class StatistiquesComponent implements OnInit, OnDestroy, AfterViewInit {
+
   isLoading = true;
+  hasError = false;
+  errorMessage = '';
   today: Date = new Date();
-  
-  // Données qui viendront du backend
+
   totaux: Totaux = { formations: 0, participants: 0, formateurs: 0 };
   formationsParAnnee: StatDTO[] = [];
   formationsParDomaine: StatDTO[] = [];
   formationsParStructure: StatDTO[] = [];
-  
-  // Graphiques
-  private chartAnnee: any;
-  private chartDomaine: any;
-  private chartStructure: any;
-  private chartEvolution: any;
-  
-  // Données pour l'évolution mensuelle (calculées dynamiquement)
+  formationsParMois: StatDTO[] = [];
+  tauxParticipation: number = 0;
+
+  private chartAnnee: Chart | null = null;
+  private chartDomaine: Chart | null = null;
+  private chartStructure: Chart | null = null;
+  private chartEvolution: Chart | null = null;
+
+  private isDestroyed = false;
+  private chartTimeout: any = null;
+  private isFirstLoad = true;
+
   evolutionData = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
     formations: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     participants: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   };
 
-  constructor(private statistiqueService: StatistiqueService) {}
+  constructor(
+    private statistiqueService: StatistiqueService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    console.log('StatistiquesComponent initialisé - Chargement des données backend...');
+    this.isDestroyed = false;
+    this.isFirstLoad = true;
     this.loadAllData();
   }
 
-  ngOnDestroy(): void {
-    // Détruire les graphiques
-    if (this.chartAnnee) this.chartAnnee.destroy();
-    if (this.chartDomaine) this.chartDomaine.destroy();
-    if (this.chartStructure) this.chartStructure.destroy();
-    if (this.chartEvolution) this.chartEvolution.destroy();
-  }
-
-  loadAllData(): void {
-    this.isLoading = true;
-    
-    // Charger toutes les données en parallèle
-    Promise.all([
-      this.statistiqueService.getTotaux().toPromise(),
-      this.statistiqueService.formationsParAnnee().toPromise(),
-      this.statistiqueService.formationsParDomaine().toPromise(),
-      this.statistiqueService.formationsParStructure().toPromise()
-    ]).then(([totaux, parAnnee, parDomaine, parStructure]) => {
-      
-      // Mettre à jour les données
-      this.totaux = totaux || { formations: 0, participants: 0, formateurs: 0 };
-      this.formationsParAnnee = parAnnee || [];
-      this.formationsParDomaine = parDomaine || [];
-      this.formationsParStructure = parStructure || [];
-      
-      // Générer l'évolution mensuelle à partir des données réelles
-      this.generateEvolutionData();
-      
-      this.isLoading = false;
-      
-      // Créer les graphiques après chargement
+  ngAfterViewInit(): void {
+    if (!this.isLoading && !this.hasError && this.totaux.formations > 0) {
       setTimeout(() => {
-        this.createAllCharts();
+        if (!this.isDestroyed) {
+          this.destroyCharts();
+          this.createAllCharts();
+        }
       }, 100);
-      
-      console.log('Données backend chargées:', {
-        totaux: this.totaux,
-        parAnnee: this.formationsParAnnee,
-        parDomaine: this.formationsParDomaine,
-        parStructure: this.formationsParStructure
-      });
-      
-    }).catch(err => {
-      console.error('Erreur chargement données backend:', err);
-      this.isLoading = false;
-      // Afficher un message d'erreur
-      this.showErrorMessage();
-    });
+    }
   }
 
+  ngOnDestroy(): void {
+    this.isDestroyed = true;
+    
+    if (this.chartTimeout) {
+      clearTimeout(this.chartTimeout);
+      this.chartTimeout = null;
+    }
+    
+    this.destroyCharts();
+  }
+
+  /**
+   * Charge toutes les données du backend
+   */
+  async loadAllData(): Promise<void> {
+    this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
+
+    try {
+      const [totaux, parAnnee, parDomaine, parStructure, parMois] = await Promise.all([
+        firstValueFrom(this.statistiqueService.getTotaux()),
+        firstValueFrom(this.statistiqueService.formationsParAnnee()),
+        firstValueFrom(this.statistiqueService.formationsParDomaine()),
+        firstValueFrom(this.statistiqueService.formationsParStructure()),
+        firstValueFrom(this.statistiqueService.formationsParMois())
+      ]);
+
+      if (this.isDestroyed) {
+        return;
+      }
+
+      this.totaux = totaux ?? { formations: 0, participants: 0, formateurs: 0 };
+      this.formationsParAnnee = parAnnee ?? [];
+      this.formationsParDomaine = parDomaine ?? [];
+      this.formationsParStructure = parStructure ?? [];
+      this.formationsParMois = parMois ?? [];
+
+      this.tauxParticipation = this.calcTaux();
+      this.generateEvolutionData();
+
+      this.isLoading = false;
+      this.isFirstLoad = false;
+
+      if (!this.isDestroyed) {
+        this.cdr.detectChanges();
+      }
+
+      if (this.chartTimeout) {
+        clearTimeout(this.chartTimeout);
+      }
+
+      this.chartTimeout = setTimeout(() => {
+        if (!this.isDestroyed) {
+          this.createAllCharts();
+        }
+      }, 200);
+
+    } catch (err: any) {
+      if (this.isDestroyed) {
+        return;
+      }
+
+      this.isLoading = false;
+      this.hasError = true;
+
+      if (err.status === 0) {
+        this.errorMessage = '❌ Serveur indisponible. Assurez-vous que le backend est en cours d\'exécution sur http://localhost:8080';
+      } else if (err.status === 500) {
+        this.errorMessage = '❌ Erreur serveur 500. Vérifiez les logs du backend pour plus de détails.';
+      } else if (err.status === 404) {
+        this.errorMessage = '❌ Endpoint non trouvé (404). Vérifiez les URL de l\'API.';
+      } else {
+        this.errorMessage = `❌ Erreur ${err.status}: ${err.message || 'Impossible de charger les données'}`;
+      }
+
+      try {
+        this.cdr.detectChanges();
+      } catch (cdrErr) {
+        // Ignorer l'erreur de détection
+      }
+    }
+  }
+
+  /**
+   * Calcule le taux de participation
+   */
+  private calcTaux(): number {
+    if (this.totaux.formations === 0) return 0;
+    const moyenne = this.totaux.participants / this.totaux.formations;
+    return Math.min(Math.round((moyenne / 15) * 100), 100);
+  }
+
+  /**
+   * Génère les données d'évolution mensuelle
+   */
   generateEvolutionData(): void {
-    // Calculer l'évolution mensuelle basée sur le total des formations
     const totalFormations = this.totaux.formations;
     const totalParticipants = this.totaux.participants;
-    
-    if (totalFormations > 0) {
-      // Répartir les formations sur les mois de manière réaliste
-      // Les mois d'été et fin d'année sont plus actifs
-      const coefficients = [0.05, 0.06, 0.07, 0.08, 0.09, 0.12, 0.1, 0.07, 0.08, 0.1, 0.1, 0.08];
-      
+
+    if (totalFormations > 0 && this.formationsParMois.length > 0) {
+      const moisMap = new Map<number, number>();
+      this.formationsParMois.forEach(d => {
+        const moisNum = parseInt(d.label.split('-')[0], 10);
+        moisMap.set(moisNum, (moisMap.get(moisNum) || 0) + d.count);
+      });
+
       for (let i = 0; i < 12; i++) {
-        this.evolutionData.formations[i] = Math.round(totalFormations * coefficients[i]);
-        this.evolutionData.participants[i] = Math.round(totalParticipants * coefficients[i]);
+        this.evolutionData.formations[i] = moisMap.get(i + 1) || 0;
+        this.evolutionData.participants[i] = Math.round(
+          (moisMap.get(i + 1) || 0) * (totalParticipants / Math.max(totalFormations, 1))
+        );
+      }
+    } else if (totalFormations > 0) {
+      const coeff = [0.05, 0.06, 0.07, 0.08, 0.09, 0.12, 0.1, 0.07, 0.08, 0.1, 0.1, 0.08];
+      for (let i = 0; i < 12; i++) {
+        this.evolutionData.formations[i] = Math.round(totalFormations * coeff[i]);
+        this.evolutionData.participants[i] = Math.round(totalParticipants * coeff[i]);
       }
     } else {
-      // Données par défaut si pas de données
       this.evolutionData.formations = [2, 3, 4, 3, 5, 7, 6, 4, 5, 6, 7, 5];
       this.evolutionData.participants = [20, 25, 30, 28, 35, 45, 40, 32, 38, 42, 48, 40];
     }
   }
 
-  showErrorMessage(): void {
-    const container = document.querySelector('.charts-grid');
-    if (container) {
-      container.innerHTML = `
-        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: white; border-radius: 20px;">
-          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444;"></i>
-          <h3 style="margin-top: 1rem;">Erreur de chargement des données</h3>
-          <p>Impossible de contacter le serveur. Vérifiez que le backend est démarré.</p>
-          <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
-            Réessayer
-          </button>
-        </div>
-      `;
-    }
+  /**
+   * Recharge les données
+   */
+  refreshData(): void {
+    this.destroyCharts();
+    this.loadAllData();
   }
 
-  createAllCharts(): void {
+  // ─────────────────────── CHARTS ───────────────────────
+
+  private createAllCharts(): void {
+    const evolutionCanvas = document.getElementById('chartEvolution');
+    const anneeCanvas = document.getElementById('chartAnnee');
+    const domaineCanvas = document.getElementById('chartDomaine');
+    const structureCanvas = document.getElementById('chartStructure');
+    
+    if (!evolutionCanvas && !anneeCanvas && !domaineCanvas && !structureCanvas) {
+      setTimeout(() => {
+        if (!this.isDestroyed) {
+          this.createAllCharts();
+        }
+      }, 100);
+      return;
+    }
+    
     this.createEvolutionChart();
     this.createAnneeChart();
     this.createDomaineChart();
     this.createStructureChart();
   }
 
-  createEvolutionChart(): void {
+  private destroyCharts(): void {
+    if (this.chartEvolution) {
+      this.chartEvolution.destroy();
+      this.chartEvolution = null;
+    }
+    if (this.chartAnnee) {
+      this.chartAnnee.destroy();
+      this.chartAnnee = null;
+    }
+    if (this.chartDomaine) {
+      this.chartDomaine.destroy();
+      this.chartDomaine = null;
+    }
+    if (this.chartStructure) {
+      this.chartStructure.destroy();
+      this.chartStructure = null;
+    }
+  }
+
+  private createEvolutionChart(): void {
     const canvas = document.getElementById('chartEvolution') as HTMLCanvasElement;
     if (!canvas) return;
-
-    if (this.chartEvolution) this.chartEvolution.destroy();
+    
+    if (this.chartEvolution) {
+      this.chartEvolution.destroy();
+      this.chartEvolution = null;
+    }
 
     this.chartEvolution = new Chart(canvas, {
       type: 'line',
@@ -195,24 +300,24 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     });
   }
 
-  createAnneeChart(): void {
+  private createAnneeChart(): void {
     const canvas = document.getElementById('chartAnnee') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas || this.formationsParAnnee.length === 0) return;
+    
+    if (this.chartAnnee) {
+      this.chartAnnee.destroy();
+      this.chartAnnee = null;
+    }
 
-    if (this.chartAnnee) this.chartAnnee.destroy();
-
-    // Trier par année
-    const sortedData = [...this.formationsParAnnee].sort((a, b) => 
-      parseInt(a.label) - parseInt(b.label)
-    );
+    const sorted = [...this.formationsParAnnee].sort((a, b) => parseInt(a.label) - parseInt(b.label));
 
     this.chartAnnee = new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: sortedData.map(d => d.label),
+        labels: sorted.map(d => d.label),
         datasets: [{
-          label: 'Nombre de formations',
-          data: sortedData.map(d => d.count),
+          label: 'Formations',
+          data: sorted.map(d => d.count),
           backgroundColor: 'rgba(102, 126, 234, 0.7)',
           borderColor: '#667eea',
           borderWidth: 2,
@@ -227,18 +332,21 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
           tooltip: { callbacks: { label: (ctx: any) => `${ctx.raw} formation(s)` } }
         },
         scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+          y: { beginAtZero: true },
           x: { grid: { display: false } }
         }
       }
     });
   }
 
-  createDomaineChart(): void {
+  private createDomaineChart(): void {
     const canvas = document.getElementById('chartDomaine') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    if (this.chartDomaine) this.chartDomaine.destroy();
+    if (!canvas || this.formationsParDomaine.length === 0) return;
+    
+    if (this.chartDomaine) {
+      this.chartDomaine.destroy();
+      this.chartDomaine = null;
+    }
 
     const colors = ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec489a', '#8b5cf6'];
 
@@ -262,9 +370,7 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
             callbacks: {
               label: (ctx: any) => {
                 const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
-                const value = ctx.raw;
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${ctx.label}: ${value} (${percentage}%)`;
+                return `${ctx.label}: ${ctx.raw} (${((ctx.raw / total) * 100).toFixed(1)}%)`;
               }
             }
           }
@@ -274,18 +380,23 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
     });
   }
 
-  createStructureChart(): void {
+  private createStructureChart(): void {
     const canvas = document.getElementById('chartStructure') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas || this.formationsParStructure.length === 0) return;
+    
+    if (this.chartStructure) {
+      this.chartStructure.destroy();
+      this.chartStructure = null;
+    }
 
-    if (this.chartStructure) this.chartStructure.destroy();
+    const maxVal = Math.max(...this.formationsParStructure.map(d => d.count), 10);
 
     this.chartStructure = new Chart(canvas, {
       type: 'bar',
       data: {
         labels: this.formationsParStructure.map(d => d.label),
         datasets: [{
-          label: 'Participants par structure',
+          label: 'Participants',
           data: this.formationsParStructure.map(d => d.count),
           backgroundColor: 'rgba(16, 185, 129, 0.7)',
           borderColor: '#10b981',
@@ -301,29 +412,27 @@ export class StatistiquesComponent implements OnInit, OnDestroy {
           tooltip: { callbacks: { label: (ctx: any) => `${ctx.raw} participant(s)` } }
         },
         scales: {
-          y: { beginAtZero: true, ticks: { stepSize: Math.ceil(Math.max(...this.formationsParStructure.map(d => d.count), 10) / 5) } },
+          y: { beginAtZero: true, ticks: { stepSize: Math.ceil(maxVal / 5) } },
           x: { grid: { display: false } }
         }
       }
     });
   }
 
+  // ─────────────────────── HELPERS ───────────────────────
+
   getParticipationRate(): number {
-    if (this.totaux.formations === 0) return 0;
-    const avg = this.totaux.participants / this.totaux.formations;
-    // Taux basé sur une moyenne idéale de 15 participants par formation
-    return Math.min(Math.round((avg / 15) * 100), 100);
+    return this.tauxParticipation;
   }
 
   getTopDomaine(): string {
-    if (this.formationsParDomaine.length === 0) return 'Informatique';
-    const top = [...this.formationsParDomaine].sort((a, b) => b.count - a.count)[0];
-    return top.label;
+    if (this.formationsParDomaine.length === 0) return 'Aucune donnée';
+    return [...this.formationsParDomaine].sort((a, b) => b.count - a.count)[0].label;
   }
 
   getTopMois(): string {
-    const maxIndex = this.evolutionData.formations.indexOf(Math.max(...this.evolutionData.formations));
     const mois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-    return mois[maxIndex] || 'Novembre';
+    const maxIdx = this.evolutionData.formations.indexOf(Math.max(...this.evolutionData.formations));
+    return mois[maxIdx] || 'N/A';
   }
 }
