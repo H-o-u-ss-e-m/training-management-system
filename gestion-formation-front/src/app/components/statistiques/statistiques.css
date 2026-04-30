@@ -178,6 +178,70 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* ========== HEADER RIGHT ========== */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ========== EXPORT PDF BUTTON ========== */
+.export-pdf-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+.export-pdf-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+.export-pdf-btn:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+}
+
+.export-pdf-btn:hover::before {
+  left: 100%;
+}
+
+.export-pdf-btn:active {
+  transform: translateY(-1px);
+}
+
+.export-pdf-btn i {
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+  z-index: 1;
+  position: relative;
+}
+
+.export-pdf-btn:hover i {
+  transform: rotate(5deg) scale(1.1);
+}
+
 /* ========== KPI CARDS ========== */
 .kpi-grid {
   display: grid;
@@ -417,12 +481,31 @@
   line-height: 1.4;
 }
 
+/* ========== PRINT STYLES ========== */
+@media print {
+  .export-pdf-btn {
+    display: none !important;
+  }
+
+  .stats-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .chart-card, 
+  .kpi-card, 
+  .insight-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
   .charts-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .chart-card.full-width {
     grid-column: auto;
   }
@@ -430,6 +513,10 @@
   .page-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .header-right {
+    width: 100%;
   }
 }
 
@@ -461,6 +548,22 @@
   }
 
   .chart-legend {
+    width: 100%;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .export-pdf-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .header-date {
+    justify-content: center;
     width: 100%;
   }
 }
@@ -495,5 +598,14 @@
 
   .chart-container {
     height: 200px;
+  }
+
+  .export-pdf-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .export-pdf-btn i {
+    font-size: 1rem;
   }
 }

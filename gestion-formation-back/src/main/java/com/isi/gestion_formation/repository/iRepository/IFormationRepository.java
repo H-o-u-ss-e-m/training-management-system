@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface IFormationRepository extends JpaRepository<Formation, Long> {
 
-    // Pas besoin de @Query, JPA les génère automatiquement
-    // On garde juste les noms de méthodes standards
+
 }

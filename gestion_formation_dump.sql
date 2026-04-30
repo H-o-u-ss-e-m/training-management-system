@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict nhY1Z0QpeEG4g04sw7kB1d0tfYIuaeXHcrPUAmvHwwm36R6wiN2r0S90kt4vLva
+\restrict uWPmJy58ifgrhc0u22tdMSx4DLcMaHmEokwLiET7EG8qeKNNrmFYgitAQ3lyXf5
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
@@ -299,6 +299,10 @@ COPY public.domaine (id, libelle) FROM stdin;
 4	D‚veloppement Personnel
 1	Informatique
 5	math
+7	Cybers‚curit‚
+8	Ressources Humaines
+9	Langues et Communication
+10	Qualit‚ et Audit
 \.
 
 
@@ -326,6 +330,17 @@ COPY public.formateur (id, email, nom, prenom, tel, type, id_employeur) FROM std
 7	j.durant@expert.fr	Durant	Jean	003312233	EXTERNE	2
 8	j.duradssadsant@expert.fr	ala	Jalaan	22222222	EXTERNE	2
 9	alice.dupont@expert-it.fr	Dupont	Alice	00336112233	EXTERNE	2
+10	azizrh109@gmail.com	testformateur	test	43567844	INTERNE	1
+11	sarah.benali@greenbuilding.tn	Benali	Sarah	22133400	INTERNE	1
+12	youssef.karoui@external.com	Karoui	Youssef	99887766	EXTERNE	2
+13	amina.ghazali@unis.tn	Ghazali	Amina	22777000	EXTERNE	3
+14	thomas.leroy@expert.fr	Leroy	Thomas	33344455	EXTERNE	2
+15	nadia.hammami@greenbuilding.tn	Hammami	Nadia	22144556	INTERNE	1
+16	sami.mansouri@greenbuilding.tn	Mansouri	Sami	22345678	INTERNE	1
+17	rim.chaabane@external.com	Chaabane	Rim	98456789	EXTERNE	2
+18	fares.tlili@unis.tn	Tlili	Fares	23456789	EXTERNE	3
+19	hela.zouari@greenbuilding.tn	Zouari	Hela	22567890	INTERNE	1
+20	mehdi.bouzid@external.com	Bouzid	Mehdi	97567890	EXTERNE	2
 \.
 
 
@@ -334,12 +349,59 @@ COPY public.formateur (id, email, nom, prenom, tel, type, id_employeur) FROM std
 --
 
 COPY public.formation (id, annee, budget, duree, titre, id_domaine, id_formateur, date_formation, lieu) FROM stdin;
-2	2025	6200	3	Gestion FinanciŠre pour Managers	2	2	2025-07-15	Salle B2
 3	2026	7800	4	Leadership et Management d'‚quipe	3	3	2026-03-20	Salle Conf‚rence
 4	2026	9200	5	D‚veloppement Web avec React	1	4	2026-05-05	Salle A1
 5	2025	12000	4	IA et Machine Learning	1	5	2025-09-15	Salle Innovation
+12	2025	4500	5	Anglais Professionnel	9	18	2025-08-05	Salle B3
 7	2025	5500	3	Masterclass Docker & Kubernetes	1	3	2025-11-20	Centre de Calcul
 1	2025	9000	6	Java Spring Boot Avancé (MODIFIÉ)	1	1	2025-06-10	Salle A1
+2	2025	6200	3	Gestion Financiere pour Managers	2	2	2025-07-15	Salle B2
+8	2026	31243	13	test formation	3	10	2026-04-24	tunis
+9	2026	31243	13	test formation	3	10	2026-04-24	tunis
+11	2025	5000	2	Recrutement et Gestion des Talents	7	17	2025-04-20	Salle B1
+13	2026	7200	4	ISO 9001 et Gestion de la Qualit‚	9	19	2026-02-10	Salle Conf‚rence
+15	2025	9500	4	Python pour la Data Science	1	16	2025-10-12	Salle A1
+16	2026	4000	3	Communication et Prise de Parole	8	17	2026-03-25	Salle B2
+17	2025	8000	5	Audit Interne et Contr“le	9	18	2025-12-08	Salle B1
+18	2025	8500	3	Cybers‚curit‚ Fondamentaux	7	16	2025-03-10	Salle A2
+19	2026	11000	6	Pentest et S‚curit‚ Offensive	7	20	2026-06-15	Salle Innovation
+22	2020	4000	3	Introduction … Python	1	1	2020-02-10	Salle A1
+23	2020	3500	2	Gestion de Projet Agile	3	2	2020-04-15	Salle B1
+24	2020	5000	4	Comptabilit‚ Analytique	2	2	2020-06-20	Salle B2
+25	2020	4500	3	Bases de Donn‚es SQL	1	3	2020-09-08	Salle A2
+26	2020	3000	2	Communication Interpersonnelle	9	17	2020-11-12	Salle B3
+27	2021	7000	5	D‚veloppement Android	1	1	2021-01-18	Salle A1
+28	2021	6000	3	Leadership Strat‚gique	3	3	2021-03-22	Salle Conf‚rence
+29	2021	5500	4	Excel Avanc‚ et Power BI	2	2	2021-05-10	Salle B2
+30	2021	3200	2	Gestion du Stress au Travail	4	17	2021-07-14	Salle B1
+31	2021	8000	5	R‚seaux et Infrastructure	1	5	2021-09-06	Centre de Calcul
+32	2021	7200	4	Audit Financier	2	2	2021-11-23	Salle B2
+33	2022	9000	5	DevOps et CI/CD	1	3	2022-02-07	Salle Innovation
+34	2022	5000	3	Marketing Digital	3	17	2022-04-19	Salle B1
+35	2022	6500	4	Gestion des Risques	2	2	2022-06-13	Salle Conf‚rence
+36	2022	9500	5	S‚curit‚ des R‚seaux	7	16	2022-08-22	Salle A2
+37	2022	4000	2	Coaching et Mentoring	4	17	2022-10-05	Salle B3
+38	2022	5800	3	Qualit‚ ISO 14001	10	18	2022-12-01	Salle B1
+39	2023	11000	5	Cloud Computing AWS	1	1	2023-01-16	Salle Innovation
+40	2023	3800	2	Gestion des Conflits	3	3	2023-03-27	Salle B1
+41	2023	7000	4	Analyse FinanciŠre	2	2	2023-05-09	Salle B2
+42	2023	13000	6	Intelligence Artificielle Appliqu‚e	1	5	2023-07-03	Salle Innovation
+43	2023	3500	2	Prise de Parole en Public	9	17	2023-09-18	Salle Conf‚rence
+44	2023	6000	3	RGPD et Protection des Donn‚es	7	16	2023-11-07	Salle A2
+45	2024	10000	5	Microservices avec Spring	1	1	2024-02-05	Salle A1
+46	2024	5500	3	Recrutement Strat‚gique	8	17	2024-04-11	Salle B1
+47	2024	7500	4	Contr“le de Gestion	2	2	2024-06-24	Salle B2
+48	2024	12000	6	Cybers‚curit‚ Avanc‚e	7	16	2024-08-14	Salle Innovation
+49	2024	6200	3	Management de la Performance	3	3	2024-10-03	Salle Conf‚rence
+50	2024	5000	4	Anglais des Affaires	9	18	2024-12-09	Salle B3
+51	2025	9800	5	Flutter et D‚veloppement Mobile	1	1	2025-01-20	Salle A1
+52	2025	5200	3	Gestion des Talents RH	8	17	2025-05-06	Salle B1
+53	2025	8800	4	Analyse de Donn‚es avec R	1	5	2025-07-22	Salle Innovation
+54	2025	4500	2	Management Interculturel	3	3	2025-10-30	Salle Conf‚rence
+55	2026	12500	5	Architecture Microservices	1	1	2026-01-13	Salle Innovation
+56	2026	6800	3	Tableau de Bord et Reporting	2	2	2026-04-07	Salle B2
+57	2026	4200	2	N‚gociation et Persuasion	9	17	2026-07-21	Salle B3
+58	2026	7800	4	Lean Management	3	3	2026-09-15	Salle Conf‚rence
 \.
 
 
@@ -357,6 +419,15 @@ COPY public.participant (id, email, nom, prenom, tel, id_profil, id_structure) F
 7	nabil.bouaziz@greenbuilding.tn	Bouaziz	Nabil	22123460	3	3
 8	rania.jallouli@greenbuilding.tn	Jallouli	Rania	98123460	1	2
 10	yassine.k@greenbuilding.tn	Kassab	Yassine	21622334455	1	2
+11	rezguihoussem118@gmail.com	testhoussem	test	55667865	1	2
+12	ines.ayari@greenbuilding.tn	Ayari	Ines	22234567	1	1
+14	donia.nasr@greenbuilding.tn	Nasr	Donia	22345670	3	5
+16	syrine.belhaj@greenbuilding.tn	Belhaj	Syrine	22456780	6	6
+17	tarek.hamrouni@greenbuilding.tn	Hamrouni	Tarek	98456780	4	3
+19	nour.sassi@greenbuilding.tn	Sassi	Nour	98567801	2	5
+23	bilel.ferchichi@greenbuilding.tn	Ferchichi	Bilel	98234567	2	5
+24	riadh.ghedira@greenbuilding.tn	Ghedira	Riadh	98345670	6	2
+25	malek.dridi@greenbuilding.tn	Dridi	Malek	22567801	1	5
 \.
 
 
@@ -384,6 +455,94 @@ COPY public.participer (id_participant, id_formation) FROM stdin;
 7	2
 7	5
 7	1
+11	8
+11	9
+1	22
+1	27
+1	33
+1	39
+1	45
+1	51
+2	23
+2	29
+2	35
+2	41
+2	47
+3	24
+3	30
+3	36
+3	40
+3	44
+4	25
+4	31
+4	39
+4	42
+4	48
+5	26
+5	32
+5	38
+5	43
+5	50
+6	22
+6	28
+6	33
+6	40
+6	46
+7	23
+7	29
+7	34
+7	41
+7	47
+8	24
+8	30
+8	36
+8	42
+8	48
+10	25
+10	31
+10	37
+10	44
+10	51
+12	22
+12	27
+12	36
+12	42
+12	48
+14	23
+14	28
+14	34
+14	40
+14	46
+16	26
+16	32
+16	38
+16	43
+16	50
+17	24
+17	30
+17	35
+17	41
+17	49
+19	25
+19	31
+19	37
+19	44
+19	52
+23	26
+23	33
+23	39
+23	45
+23	53
+24	23
+24	29
+24	35
+24	41
+24	47
+25	22
+25	28
+25	34
+25	40
+25	46
 \.
 
 
@@ -396,6 +555,9 @@ COPY public.profil (id, libelle) FROM stdin;
 2	Informaticien (Bac+3)
 3	Gestionnaire
 4	Technicien Sup‚rieur
+6	Ing‚nieur Principal
+7	Chef de Projet
+8	Auditeur
 \.
 
 
@@ -418,6 +580,9 @@ COPY public.structure (id, libelle) FROM stdin;
 1	Direction Centrale
 2	Direction R‚gionale Tunis
 3	Direction R‚gionale Sfax
+5	Direction R‚gionale Sousse
+6	Direction R‚gionale Bizerte
+7	Direction Technique
 \.
 
 
@@ -430,6 +595,7 @@ COPY public.utilisateur (id, login, password, id_role) FROM stdin;
 2	responsable	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	2
 4	chef_formation	$2a$10$QYXwyiNtVnL8AdHml4PxE.XkHpQhWe0f5lc30e2vtGqVomYaSCpM6	2
 1	test	$2a$10$8KzQ8zqKzqKzqKzqKzqKzO8KzQ8zqKzqKzqKzqKzqKzqKzqKzqKzq	1
+6	houssem	$2a$10$qdQc7pTlfeRols20pPU/JOLZk2.h6lfGvJG4MXBIqisQK4rGSxtGm	1
 \.
 
 
@@ -437,7 +603,7 @@ COPY public.utilisateur (id, login, password, id_role) FROM stdin;
 -- Name: domaine_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.domaine_id_seq', 6, true);
+SELECT pg_catalog.setval('public.domaine_id_seq', 11, true);
 
 
 --
@@ -451,28 +617,28 @@ SELECT pg_catalog.setval('public.employeur_id_seq', 4, true);
 -- Name: formateur_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.formateur_id_seq', 9, true);
+SELECT pg_catalog.setval('public.formateur_id_seq', 20, true);
 
 
 --
 -- Name: formation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.formation_id_seq', 7, true);
+SELECT pg_catalog.setval('public.formation_id_seq', 58, true);
 
 
 --
 -- Name: participant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.participant_id_seq', 10, true);
+SELECT pg_catalog.setval('public.participant_id_seq', 28, true);
 
 
 --
 -- Name: profil_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.profil_id_seq', 5, true);
+SELECT pg_catalog.setval('public.profil_id_seq', 8, true);
 
 
 --
@@ -486,14 +652,14 @@ SELECT pg_catalog.setval('public.role_id_seq', 4, true);
 -- Name: structure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.structure_id_seq', 4, true);
+SELECT pg_catalog.setval('public.structure_id_seq', 7, true);
 
 
 --
 -- Name: utilisateur_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.utilisateur_id_seq', 5, true);
+SELECT pg_catalog.setval('public.utilisateur_id_seq', 6, true);
 
 
 --
@@ -644,5 +810,5 @@ ALTER TABLE ONLY public.participer
 -- PostgreSQL database dump complete
 --
 
-\unrestrict nhY1Z0QpeEG4g04sw7kB1d0tfYIuaeXHcrPUAmvHwwm36R6wiN2r0S90kt4vLva
+\unrestrict uWPmJy58ifgrhc0u22tdMSx4DLcMaHmEokwLiET7EG8qeKNNrmFYgitAQ3lyXf5
 
